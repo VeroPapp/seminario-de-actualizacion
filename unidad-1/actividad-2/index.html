@@ -131,37 +131,58 @@
         connectedCallback() {
             console.log("Calculadora agregada al DOM");
 
+            //se asignan los event handlers a cada boton, usando bind para mantener el contexto de 'this' dentro de las funciones
             // NUMEROS
-            this.btn0.onclick = () => this.onBtn0Click();
-            this.btn1.onclick = () => this.onBtn1Click();
-            this.btn2.onclick = () => this.onBtn2Click();
-            this.btn3.onclick = () => this.onBtn3Click();
-            this.btn4.onclick = () => this.onBtn4Click();
-            this.btn5.onclick = () => this.onBtn5Click();
-            this.btn6.onclick = () => this.onBtn6Click();
-            this.btn7.onclick = () => this.onBtn7Click();
-            this.btn8.onclick = () => this.onBtn8Click();
-            this.btn9.onclick = () => this.onBtn9Click();
+            this.btn0.onclick = this.onBtn0Click.bind(this);
+            this.btn1.onclick = this.onBtn1Click.bind(this);
+            this.btn2.onclick = this.onBtn2Click.bind(this);
+            this.btn3.onclick = this.onBtn3Click.bind(this);
+            this.btn4.onclick = this.onBtn4Click.bind(this);
+            this.btn5.onclick = this.onBtn5Click.bind(this);
+            this.btn6.onclick = this.onBtn6Click.bind(this);
+            this.btn7.onclick = this.onBtn7Click.bind(this);
+            this.btn8.onclick = this.onBtn8Click.bind(this);
+            this.btn9.onclick = this.onBtn9Click.bind(this);
 
             // OPERACIONES
-            this.btnDot.onclick = () => this.onBtnDotClick();
-            this.btnPlus.onclick = () => this.onBtnPlusClick();
-            this.btnMinus.onclick = () => this.onBtnMinusClick();
-            this.btnMult.onclick = () => this.onBtnMultiplyClick();
-            this.btnDiv.onclick = () => this.onBtnDivisionClick();
+            this.btnDot.onclick = this.onBtnDotClick.bind(this);
+            this.btnPlus.onclick = this.onBtnPlusClick.bind(this);
+            this.btnMinus.onclick = this.onBtnMinusClick.bind(this);
+            this.btnMult.onclick = this.onBtnMultiplyClick.bind(this);
+            this.btnDiv.onclick = this.onBtnDivisionClick.bind(this);
 
             // OTROS
-            this.btnClear.onclick = () => this.onBtnDeleteClick();
-            this.btnEquals.onclick = () => this.onBtnResultClick();
+            this.btnClear.onclick = this.onBtnDeleteClick.bind(this);
+            this.btnEquals.onclick = this.onBtnResultClick.bind(this);
         }
 
         disconnectedCallback() {
             console.log("Calculadora removida del DOM");
+            this.btn0.onclick = null;
+            this.btn1.onclick = null;
+            this.btn2.onclick = null;
+            this.btn3.onclick = null;
+            this.btn4.onclick = null;
+            this.btn5.onclick = null;
+            this.btn6.onclick = null;
+            this.btn7.onclick = null;
+            this.btn8.onclick = null;
+            this.btn9.onclick = null;
+
+            this.btnDot.onclick = null;
+            this.btnPlus.onclick = null;
+            this.btnMinus.onclick = null;
+            this.btnMult.onclick = null;
+            this.btnDiv.onclick = null;
+            this.btnClear.onclick = null;
+            this.btnEquals.onclick = null;
         }
     }
 
     // registrar
     customElements.define('x-calculator', Calculator);
+
+
 
     function main() {
         const calc = new Calculator();
