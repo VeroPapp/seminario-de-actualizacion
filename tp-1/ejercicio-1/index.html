@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Saludador</title>
+</head>
+    
+<body>
+        
+</body>
+
+<script>
+    class Saludo extends HTMLElement {
+
+        constructor() {
+            super();
+
+            this.nombreInput = document.createElement('input');
+            this.apellidoInput = document.createElement('input');
+            this.boton = document.createElement('button');
+            this.resultado = document.createElement('p');
+
+            this.nombreInput.placeholder = "Nombre";
+            this.apellidoInput.placeholder = "Apellido";
+            this.boton.textContent = "Saludar";
+
+            this.appendChild(this.nombreInput);
+            this.appendChild(this.apellidoInput);
+            this.appendChild(this.boton);
+            this.appendChild(this.resultado);
+        }
+
+        onBtnClick() {
+            let nombre = this.nombreInput.value;
+            let apellido = this.apellidoInput.value;
+
+            apellido = apellido.toUpperCase();
+
+            nombre = nombre.charAt(0).toUpperCase() + nombre.slice(1).toLowerCase();
+
+            this.resultado.textContent = `¡Buenos días ${apellido}, ${nombre}!`;
+        }
+
+        connectedCallback() {
+            this.boton.onclick = this.onBtnClick.bind(this);
+        }
+
+        disconnectedCallback() {
+            this.boton.onclick = null;
+        }
+    }
+
+    customElements.define('x-saludo', Saludo);
+
+    function main() {
+        const saludo = new Saludo();
+        document.body.appendChild(saludo);
+    }
+
+    window.onload = main;
+</script>
+
+</html>
