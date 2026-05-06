@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Validador de fecha</title>
+</head>
+    
+<body>
+        
+</body>
+
+<script>
+    class ValidadorFecha extends HTMLElement {
+
+        constructor() {
+            super();
+
+            this.label = document.createElement('label');
+            this.inputFecha = document.createElement('input');
+            this.botonValidar = document.createElement('button');
+            this.intentos = 0;
+
+            this.label.textContent = "Fecha de nacimiento: ";
+            this.inputFecha.placeholder = "dd/mm/yyyy";
+            this.botonValidar.textContent = "Validar";
+
+            this.appendChild(this.label);
+            this.appendChild(this.inputFecha);
+            this.appendChild(this.botonValidar);
+        }
+
+        esFechaValida(fecha) {
+            let partes = fecha.split('/');
+            
+            if (partes.length !== 3) return false;
+            
+            let dia = parseInt(partes[0]);
+            let mes = parseInt(partes[1]) - 1; // los meses en JS van de 0 a 11
+            let anio = parseInt(partes[2]);
+            
+            let fechaObj = new Date(anio, mes, dia);
+
+            // validar fecha real
+            let esReal = (
+                fechaObj.getFullYear() === anio &&
+                fechaObj.getMonth() === mes &&
+                fechaObj.getDate() === dia
+            );
+
+            if (!esReal) return false;
+
+            // validar que no sea futura
+            let hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
+            if (fechaObj > hoy) return false;
+
+            return true;
+        }
+
+
+        onBtnClick() {
+            let fecha = this.inputFecha.value;
+
+            if (this.esFechaValida(fecha)) {
+                alert("Fecha válida");
+            } else {
+                this.intentos++;
+                alert(`Error (intento ${this.intentos}): fecha inválida`);
+                this.inputFecha.value = "";
+            }
+        }
+
+        connectedCallback() {
+            this.botonValidar.onclick = this.onBtnClick.bind(this);
+        }
+
+        disconnectedCallback() {
+            this.botonValidar.onclick = null;
+        }
+    }
+
+    customElements.define('x-validadorFecha', ValidadorFecha);
+
+    function main() {
+        const validadorFecha = new ValidadorFecha();
+        document.body.appendChild(validadorFecha);
+    }
+
+    window.onload = main;
+</script>
+
+</html>
