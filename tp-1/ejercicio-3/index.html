@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Equalizer</title>
+
+    <style>
+        .window {
+            width: 700px;
+            margin: 20px auto;
+            border: 2px solid gray;
+            background-color: #c0c0c0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            background: linear-gradient(to right, #2b5797, #5a7bd8);
+            color: white;
+            padding: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .toolbar {
+            padding: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .content {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            justify-content: center;
+        }
+
+        .band {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            width: 20px;
+            height: 120px;
+            writing-mode: vertical-lr; 
+            direction: rtl
+        }
+
+    </style>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Slider extends HTMLElement {
+
+        constructor() {
+            super();
+
+            this.container = document.createElement('div');
+            this.container.className = 'band';
+
+            this.label = document.createElement('span');
+
+            this.slider = document.createElement('input');
+            this.slider.type = 'range';
+            this.slider.min = -10;
+            this.slider.max = 10;
+
+            this.valueText = document.createElement('span');
+
+            this.container.appendChild(this.label);
+            this.container.appendChild(this.slider);
+            this.container.appendChild(this.valueText);
+
+            this.appendChild(this.container);
+        }
+
+        onSliderInput() {
+            this.valueText.textContent = this.slider.value + " dB";
+        }
+
+        setData(freq, value) {
+            this.label.textContent = freq;
+
+            this.slider.value = value;
+
+            this.valueText.textContent = value + " dB";
+        }
+
+        getData() {
+            return {
+                frequency: this.label.textContent,
+                value: this.slider.value
+            };
+        }
+
+        connectedCallback() {
+
+            this.slider.oninput = this.onSliderInput.bind(this);
+        }
+
+        disconnectedCallback() {
+            this.slider.oninput = null;
+        }
+    }
+
+    customElements.define('x-slider', Slider);
+
+
+
+    class Equalizer extends HTMLElement {
+
+        constructor() {
+            super();
+
+            this.data = {
+                "32Hz": 0,
+                "64Hz": 0,
+                "130Hz": 0,
+                "260Hz": 0,
+                "500Hz": 0,
+                "1k": 0,
+                "2k": 0,
+                "4k": 0,
+                "8.3k": 0,
+                "16.5k": 0
+            };
+
+            this.window = document.createElement('div');
+            this.window.className = 'window';
+
+            this.header = document.createElement('div');
+            this.header.className = 'header';
+
+            this.mainTitle = document.createElement('span');
+            this.mainTitle.textContent = "Graphic EQ";
+
+            this.closeBtn = document.createElement('button');
+            this.closeBtn.textContent = "X";
+
+            this.header.appendChild(this.mainTitle);
+            this.header.appendChild(this.closeBtn);
+
+            this.toolbar = document.createElement('div');
+            this.toolbar.className = 'toolbar';
+
+            this.select = document.createElement('select');
+
+            let option = document.createElement('option');
+            option.textContent = "Preset 1";
+
+            this.select.appendChild(option);
+
+            this.btnG = document.createElement('button');
+            this.btnG.textContent = "G";
+
+            this.btnX = document.createElement('button');
+            this.btnX.textContent = "X";
+
+            this.toolbar.appendChild(this.select);
+            this.toolbar.appendChild(this.btnG);
+            this.toolbar.appendChild(this.btnX);
+
+            this.content = document.createElement('div');
+            this.content.className = 'content';
+
+            this.window.appendChild(this.header);
+            this.window.appendChild(this.toolbar);
+            this.window.appendChild(this.content);
+
+            this.appendChild(this.window);
+        }
+
+        render() {
+
+            // eliminar sliders anteriores
+            while (this.content.firstChild) {
+                this.content.removeChild(this.content.firstChild);
+            }
+
+            // volver a crear sliders
+            for (let freq in this.data) {
+
+                // crear componente hijo
+                let slider = new Slider();
+
+                // pasar datos
+                slider.setData(freq, this.data[freq]);
+
+                // agregar al contenedor
+                this.content.appendChild(slider);
+            }
+        }
+
+        getData() {
+            return this.data;
+        }
+
+        setData(newData) {
+            this.data = newData;
+            this.render();
+        }
+
+        connectedCallback() {
+
+            this.render();
+
+        }
+
+        disconnectedCallback() {
+
+        }
+    }
+
+    customElements.define('x-equalizer', Equalizer);
+
+
+    function main(){
+        const eq = new Equalizer();
+        document.body.appendChild(eq);
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
