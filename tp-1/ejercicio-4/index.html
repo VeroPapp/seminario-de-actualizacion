@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+
+    <style>
+
+        body {
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 20px;
+            font-family: Arial;
+        }
+
+        .container {
+            border: 2px solid #dedede;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            overflow: auto;
+        }
+
+        .darker {
+            border-color: #ccc;
+            background-color: #ddd;
+        }
+
+        .container img {
+            float: left;
+            max-width: 60px;
+            width: 100%;
+            margin-right: 20px;
+            border-radius: 50%;
+        }
+
+        .container img.right {
+            float: right;
+            margin-left: 20px;
+            margin-right: 0;
+        }
+
+        .time-right {
+            float: right;
+            color: #999;
+        }
+
+        .time-left {
+            float: left;
+            color: #999;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls input {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .controls button {
+            padding: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class ChatComponent extends HTMLElement {
+
+        constructor() {
+
+            super();
+
+            this.chatContainer = document.createElement('div');
+
+            this.inputMensaje = document.createElement('input');
+            this.inputMensaje.type = "text";
+            this.inputMensaje.placeholder = "Escriba un mensaje...";
+
+            this.btnEnviar = document.createElement('button');
+            this.btnEnviar.textContent = "Enviar";
+
+            this.controls = document.createElement('div');
+            this.controls.className = "controls";
+
+            this.controls.appendChild(this.inputMensaje);
+            this.controls.appendChild(this.btnEnviar);
+
+            this.appendChild(this.chatContainer);
+            this.appendChild(this.controls);
+        }
+
+        insertarMensaje(texto, hora, lado, imagen) {
+
+            const container = document.createElement('div');
+            container.className = "container";
+
+            if (lado === "right") {
+                container.classList.add("darker");
+            }
+
+            // IMAGEN
+            const img = document.createElement('img');
+            img.src = imagen;
+
+            if (lado === "right") {
+                img.className = "right";
+            }
+
+            // MENSAJE
+            const mensaje = document.createElement('p');
+            mensaje.textContent = texto;
+
+            // HORA
+            const time = document.createElement('span');
+            time.textContent = hora;
+
+            if (lado === "right") {
+                time.className = "time-left";
+            }
+            else {
+                time.className = "time-right";
+            }
+
+            // AGREGAR
+            container.appendChild(img);
+            container.appendChild(mensaje);
+            container.appendChild(time);
+
+            this.chatContainer.appendChild(container);
+        }
+
+        onBtnEnviarClick() {
+
+            let texto = this.inputMensaje.value;
+
+            if (texto === "") {
+                return;
+            }
+
+            // obtener hora actual
+            let fecha = new Date();
+
+            let hora =
+                fecha.getHours().toString().padStart(2, '0')
+                + ":"
+                + fecha.getMinutes().toString().padStart(2, '0');
+
+            // insertar mensaje
+            this.insertarMensaje(
+                texto,
+                hora,
+                "right",
+                "https://i.pravatar.cc/400?img=15"
+            );
+
+            // limpiar input
+            this.inputMensaje.value = "";
+        }
+
+        connectedCallback() {
+
+            this.btnEnviar.onclick = this.onBtnEnviarClick.bind(this);
+
+            // MENSAJES INICIALES
+            this.insertarMensaje(
+                "Hola ¿Cómo estás?",
+                "11:00",
+                "left",
+                "https://i.pravatar.cc/400?img=22"
+            );
+
+            this.insertarMensaje(
+                "Muy bien!",
+                "11:01",
+                "right",
+                "https://i.pravatar.cc/400?img=15"
+            );
+        }
+
+        disconnectedCallback() {
+
+            this.btnEnviar.onclick = null;
+        }
+    }
+
+    customElements.define('x-chat', ChatComponent);
+
+    function main() {
+
+        const chat = new ChatComponent();
+        document.body.appendChild(chat);
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
