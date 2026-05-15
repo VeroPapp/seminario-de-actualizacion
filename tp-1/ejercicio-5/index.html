@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Factura AFIP</title>
+
+    <style>
+
+        body {
+            width: 50%;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        input {
+            padding: 5px;
+        }
+
+        button {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .producto {
+            border: 1px solid gray;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .factura {
+            margin-top: 40px;
+            border: 2px solid black;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        td,
+        th {
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        .tipoFactura {
+            width: 80px;
+            height: 80px;
+            border: 2px solid black;
+            text-align: center;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .totales {
+            width: 300px;
+            margin-left: auto;
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class DatosFactura {
+
+        constructor() {
+
+            this.datosEmpresa = {
+                razonSocial: "",
+                domicilioComercial: "",
+                condicionIVA: "Responsable Inscripto"
+            };
+
+            this.datosCliente = {
+                nombre: "",
+                domicilio: "",
+                cuit: ""
+            };
+
+            this.datosFactura = {
+                tipo: "B",
+                puntoVenta: "0002",
+                comprobante: "00000641",
+                fecha: "27/07/2016"
+            };
+
+            this.datosPeriodo = {
+                periodoFacturadoDesde: "01/07/2016",
+                periodoFacturadoHasta: "31/07/2016",
+                vtoPago: "27/09/2016"
+            };
+
+            this.detalles = [];
+        }
+    }
+
+
+
+    class Factura extends HTMLElement {
+
+        constructor(datosFactura) {
+
+            super();
+
+            this.data = datosFactura;
+
+            this.titulo = document.createElement('h1');
+            this.titulo.textContent = "Formulario Factura";
+
+            this.form = document.createElement('form');
+
+            // =====================
+            // CLIENTE
+            // =====================
+
+            this.inputNombre = document.createElement('input');
+            this.inputNombre.placeholder = "Nombre cliente";
+
+            this.inputDomicilio = document.createElement('input');
+            this.inputDomicilio.placeholder = "Domicilio cliente";
+
+            this.inputCUIT = document.createElement('input');
+            this.inputCUIT.placeholder = "CUIT cliente";
+
+            // =====================
+            // PRODUCTOS
+            // =====================
+
+            this.productosContainer = document.createElement('div');
+
+            // =====================
+            // BOTONES
+            // =====================
+
+            this.btnAgregarProducto = document.createElement('button');
+            this.btnAgregarProducto.textContent = "Agregar producto";
+            this.btnAgregarProducto.type = "button";
+
+            this.btnGenerar = document.createElement('button');
+            this.btnGenerar.textContent = "Generar factura";
+            this.btnGenerar.type = "submit";
+
+            // =====================
+            // CONTENEDOR FACTURA
+            // =====================
+
+            this.facturaContainer = document.createElement('div');
+
+            // =====================
+            // APPEND
+            // =====================
+
+            this.form.appendChild(this.inputNombre);
+            this.form.appendChild(this.inputDomicilio);
+            this.form.appendChild(this.inputCUIT);
+
+            this.form.appendChild(this.btnAgregarProducto);
+            this.form.appendChild(this.productosContainer);
+
+            this.form.appendChild(this.btnGenerar);
+
+            this.appendChild(this.titulo);
+            this.appendChild(this.form);
+            this.appendChild(this.facturaContainer);
+        }
+
+
+
+        agregarProducto() {
+
+            let productoDiv = document.createElement('div');
+            productoDiv.className = "producto";
+
+            let inputCodigo = document.createElement('input');
+            inputCodigo.placeholder = "Código";
+
+            let inputProducto = document.createElement('input');
+            inputProducto.placeholder = "Producto";
+
+            let inputCantidad = document.createElement('input');
+            inputCantidad.placeholder = "Cantidad";
+
+            let inputUnidad = document.createElement('input');
+            inputUnidad.placeholder = "U. medida";
+
+            let inputPrecio = document.createElement('input');
+            inputPrecio.placeholder = "Precio unitario";
+
+            let inputBonif = document.createElement('input');
+            inputBonif.placeholder = "% Bonificación";
+
+            productoDiv.appendChild(inputCodigo);
+            productoDiv.appendChild(inputProducto);
+            productoDiv.appendChild(inputCantidad);
+            productoDiv.appendChild(inputUnidad);
+            productoDiv.appendChild(inputPrecio);
+            productoDiv.appendChild(inputBonif);
+
+            this.productosContainer.appendChild(productoDiv);
+        }
+
+
+
+        guardarDatos() {
+
+            this.data.datosCliente.nombre = this.inputNombre.value;
+            this.data.datosCliente.domicilio = this.inputDomicilio.value;
+            this.data.datosCliente.cuit = this.inputCUIT.value;
+
+            this.data.detalles = [];
+
+            let productos = this.productosContainer.querySelectorAll('.producto');
+
+            productos.forEach((producto) => {
+
+                let inputs = producto.querySelectorAll('input');
+
+                let cantidad = parseFloat(inputs[2].value);
+
+                let precio = parseFloat(inputs[4].value);
+
+                let bonif = parseFloat(inputs[5].value);
+
+                let importeBonif = (precio * bonif) / 100;
+
+                let subtotal = (precio - importeBonif) * cantidad;
+
+                let nuevoProducto = {
+
+                    codigo: inputs[0].value,
+                    producto: inputs[1].value,
+                    cantidad: cantidad,
+                    unidadMedida: inputs[3].value,
+                    precioUnitario: precio,
+                    porcentajeBonif: bonif,
+                    importeBonif: importeBonif,
+                    subtotal: subtotal
+                };
+
+                this.data.detalles.push(nuevoProducto);
+
+            });
+        }
+
+
+
+        generarFactura(event) {
+
+            event.preventDefault();
+
+            this.guardarDatos();
+
+            this.facturaContainer.textContent = "";
+
+            // =====================
+            // FACTURA
+            // =====================
+
+            let factura = document.createElement('div');
+            factura.className = "factura";
+
+            // =====================
+            // HEADER
+            // =====================
+
+            let tablaHeader = document.createElement('table');
+
+            let filaHeader = tablaHeader.insertRow();
+
+            // EMPRESA
+
+            let empresaTD = filaHeader.insertCell();
+
+            let empresa1 = document.createElement('p');
+            empresa1.textContent = "Razón social: " + this.data.datosEmpresa.razonSocial;
+
+            let empresa2 = document.createElement('p');
+            empresa2.textContent = "Domicilio: " + this.data.datosEmpresa.domicilioComercial;
+
+            let empresa3 = document.createElement('p');
+            empresa3.textContent = "IVA: " + this.data.datosEmpresa.condicionIVA;
+
+            empresaTD.appendChild(empresa1);
+            empresaTD.appendChild(empresa2);
+            empresaTD.appendChild(empresa3);
+
+            // TIPO FACTURA
+
+            let tipoTD = filaHeader.insertCell();
+
+            let tipoDiv = document.createElement('div');
+            tipoDiv.className = "tipoFactura";
+            tipoDiv.textContent = this.data.datosFactura.tipo;
+
+            tipoTD.appendChild(tipoDiv);
+
+            // DATOS FACTURA
+
+            let datosFacturaTD = filaHeader.insertCell();
+
+            let p1 = document.createElement('p');
+            p1.textContent = "Punto venta: " + this.data.datosFactura.puntoVenta;
+
+            let p2 = document.createElement('p');
+            p2.textContent = "Comprobante: " + this.data.datosFactura.comprobante;
+
+            let p3 = document.createElement('p');
+            p3.textContent = "Fecha: " + this.data.datosFactura.fecha;
+
+            datosFacturaTD.appendChild(p1);
+            datosFacturaTD.appendChild(p2);
+            datosFacturaTD.appendChild(p3);
+
+            // =====================
+            // PERIODO
+            // =====================
+
+            let tablaPeriodo = document.createElement('table');
+            let filaPeriodo = tablaPeriodo.insertRow();
+
+            let tdDesde = filaPeriodo.insertCell();
+            tdDesde.textContent = "Desde: " + this.data.datosPeriodo.periodoFacturadoDesde;
+
+            let tdHasta = filaPeriodo.insertCell();
+            tdHasta.textContent = "Hasta: " + this.data.datosPeriodo.periodoFacturadoHasta;
+
+            let tdVto = filaPeriodo.insertCell();
+            tdVto.textContent = "Vto pago: " + this.data.datosPeriodo.vtoPago;
+
+            // =====================
+            // CLIENTE
+            // =====================
+
+            let tablaCliente = document.createElement('table');
+
+            let filaCliente1 = tablaCliente.insertRow();
+            let tdCliente1 = filaCliente1.insertCell();
+
+            tdCliente1.textContent = "Cliente: " + this.data.datosCliente.nombre;
+
+            let filaCliente2 = tablaCliente.insertRow();
+            let tdCliente2 = filaCliente2.insertCell();
+
+            tdCliente2.textContent = "Domicilio: " + this.data.datosCliente.domicilio;
+
+            let filaCliente3 = tablaCliente.insertRow();
+            let tdCliente3 = filaCliente3.insertCell();
+
+            tdCliente3.textContent = "CUIT: " + this.data.datosCliente.cuit;
+
+            // =====================
+            // DETALLE
+            // =====================
+
+            let tablaDetalle = document.createElement('table');
+
+            let filaTitulos = tablaDetalle.insertRow();
+
+            let titulos = [
+
+                "Código",
+                "Producto",
+                "Cantidad",
+                "U. medida",
+                "Precio unitario",
+                "% Bonif",
+                "Importe bonif",
+                "Subtotal"
+            ];
+
+            titulos.forEach((titulo) => {
+
+                let th = document.createElement('th');
+
+                th.textContent = titulo;
+
+                filaTitulos.appendChild(th);
+            });
+
+            // PRODUCTOS
+
+            let subtotalGeneral = 0;
+
+            this.data.detalles.forEach((p) => {
+
+                subtotalGeneral += p.subtotal;
+
+                let fila = tablaDetalle.insertRow();
+
+                fila.insertCell().textContent = p.codigo;
+                fila.insertCell().textContent = p.producto;
+                fila.insertCell().textContent = p.cantidad;
+                fila.insertCell().textContent = p.unidadMedida;
+                fila.insertCell().textContent = p.precioUnitario;
+                fila.insertCell().textContent = p.porcentajeBonif;
+                fila.insertCell().textContent = p.importeBonif;
+                fila.insertCell().textContent = p.subtotal;
+
+            });
+
+            // =====================
+            // TOTALES
+            // =====================
+
+            let tablaTotales = document.createElement('table');
+            tablaTotales.className = "totales";
+
+            let filaSubtotal = tablaTotales.insertRow();
+
+            filaSubtotal.insertCell().textContent = "Subtotal";
+            filaSubtotal.insertCell().textContent = "$ " + subtotalGeneral;
+
+            let filaTotal = tablaTotales.insertRow();
+
+            filaTotal.insertCell().textContent = "Total";
+            filaTotal.insertCell().textContent = "$ " + subtotalGeneral;
+
+            // =====================
+            // APPEND FINAL
+            // =====================
+
+            factura.appendChild(tablaHeader);
+            factura.appendChild(tablaPeriodo);
+            factura.appendChild(tablaCliente);
+            factura.appendChild(tablaDetalle);
+            factura.appendChild(tablaTotales);
+
+            this.facturaContainer.appendChild(factura);
+        }
+
+
+        connectedCallback() {
+
+            this.btnAgregarProducto.onclick = this.agregarProducto.bind(this);
+            this.form.onsubmit = this.generarFactura.bind(this);
+        }
+
+
+        disconnectedCallback() {
+
+            this.btnAgregarProducto.onclick = null;
+            this.form.onsubmit = null;
+        }
+
+    }
+
+    customElements.define('x-factura', Factura);
+
+
+
+    function main() {
+
+        let datos = new DatosFactura();
+        let factura = new Factura(datos);
+
+        document.body.appendChild(factura);
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
