@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Datos Meteorológicos</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+        }
+
+        th, td {
+            border: 1px solid gray;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #d9d9d9;
+        }
+
+    </style>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class DatosMeteorologicos {
+
+        constructor() {
+
+            this.data = {
+
+                meses: [
+                    "Ene", "Feb", "Mar", "Abr",
+                    "May", "Jun", "Jul", "Ago",
+                    "Sep", "Oct", "Nov", "Dic"
+                ],
+
+                tempMaxAbs: [
+                    42.4, 38.1, 36.3, 32.5,
+                    27.4, 22.2, 27.7, 24.7,
+                    28.8, 34.4, 35.7, 39.4
+                ],
+
+                tempMaxMedia: [
+                    26.3, 25.8, 23.7, 20.5,
+                    16.8, 13.8, 13.1, 14.4,
+                    16.0, 18.5, 21.7, 24.4
+                ],
+
+                tempMedia: [
+                    20.3, 19.9, 18.0, 14.6,
+                    11.3, 8.5, 8.1, 8.9,
+                    10.5, 13.1, 15.9, 18.5
+                ],
+
+                tempMinMedia: [
+                    14.3, 14.1, 12.5, 9.1,
+                    6.4, 4.1, 3.8, 4.0,
+                    5.3, 7.6, 10.1, 12.7
+                ],
+
+                tempMinAbs: [
+                    4.7, 1.2, 1.9, -1.0,
+                    -3.0, -5.5, -9.3, -8.4,
+                    -5.5, -3.0, -2.0, -0.2
+                ],
+
+                precipitaciones: [
+                    100.1, 72.8, 107.0, 73.3,
+                    73.5, 54.9, 58.9, 64.0,
+                    56.4, 83.4, 75.3, 104.0
+                ],
+
+                diasPrecipitaciones: [
+                    9, 8, 9, 9,
+                    9, 9, 9, 9,
+                    10, 10, 10, 7
+                ],
+
+                horaSol: [
+                    288.3, 234.5, 232.5, 195.0,
+                    167.4, 120.0, 127.1, 164.3,
+                    174.0, 210.8, 222.0, 269.7
+                ],
+
+                humedad: [
+                    76, 77, 79, 81,
+                    83, 84, 81, 81,
+                    80, 80, 77, 76
+                ],
+
+                valoresAnuales: [
+                    32.46,
+                    19.58,
+                    13.80,
+                    8.03,
+                    -2.84,
+                    923.6,
+                    107,
+                    2405.6,
+                    79.58
+                ]
+            };
+        }
+    }
+
+
+
+    class TablaMeteorologica extends HTMLElement {
+
+        constructor(datos) {
+
+            super();
+
+            this.datos = datos;
+
+            this.titulo = document.createElement('h2');
+            this.titulo.textContent = "🌥️ Parámetros climáticos promedio de Mar del Plata 🌧️";
+
+            this.tabla = document.createElement('table');
+
+            this.btnPromedios = document.createElement('button');
+            this.btnPromedios.textContent = "Mostrar promedios de temperaturas";
+
+            this.resultadoPromedios = document.createElement('div');
+
+            this.appendChild(this.titulo);
+            this.appendChild(this.tabla);
+            this.appendChild(this.btnPromedios);
+            this.appendChild(this.resultadoPromedios);
+
+            this.render();
+        }
+
+
+        crearFila(nombreFila, valores, anual) {
+
+            let fila = this.tabla.insertRow();
+
+            let celdaTitulo = fila.insertCell();
+            celdaTitulo.textContent = nombreFila;
+
+            valores.forEach((valor) => {
+
+                let celda = fila.insertCell();
+                celda.textContent = valor;
+            });
+
+            let celdaAnual = fila.insertCell();
+            celdaAnual.textContent = anual;
+        }
+
+
+        render() {
+
+            let filaMeses = this.tabla.insertRow();
+
+            let thConcepto = document.createElement('th');
+            thConcepto.textContent = "Mes";
+
+            filaMeses.appendChild(thConcepto);
+
+            this.datos.data.meses.forEach((mes) => {
+
+                let th = document.createElement('th');
+                th.textContent = mes;
+
+                filaMeses.appendChild(th);
+            });
+
+            let thAnual = document.createElement('th');
+            thAnual.textContent = "Anual";
+
+            filaMeses.appendChild(thAnual);
+
+
+            let filas = [
+
+                {
+                    nombre: "Temp. máx. abs. (°C)",
+                    valores: this.datos.data.tempMaxAbs
+                },
+
+                {
+                    nombre: "Temp. máx. media (°C)",
+                    valores: this.datos.data.tempMaxMedia
+                },
+
+                {
+                    nombre: "Temp. media (°C)",
+                    valores: this.datos.data.tempMedia
+                },
+
+                {
+                    nombre: "Temp. mín. media (°C)",
+                    valores: this.datos.data.tempMinMedia
+                },
+
+                {
+                    nombre: "Temp. mín. abs. (°C)",
+                    valores: this.datos.data.tempMinAbs
+                },
+
+                {
+                    nombre: "Precipitación total (mm)",
+                    valores: this.datos.data.precipitaciones
+                },
+
+                {
+                    nombre: "Días de precipitaciones",
+                    valores: this.datos.data.diasPrecipitaciones
+                },
+
+                {
+                    nombre: "Horas de sol",
+                    valores: this.datos.data.horaSol
+                },
+
+                {
+                    nombre: "Humedad relativa (%)",
+                    valores: this.datos.data.humedad
+                }
+            ];
+
+
+            filas.forEach((fila, index) => {
+
+                this.crearFila(
+                    fila.nombre,
+                    fila.valores,
+                    this.datos.data.valoresAnuales[index]
+                );
+            });
+        }
+
+
+        calcularPromedio(array) {
+
+            let suma = 0;
+
+            array.forEach((valor) => {
+
+                suma += valor;
+            });
+
+            return (suma / array.length).toFixed(2);
+        }
+
+
+        getPromediosTemperaturas() {
+
+            return {
+
+                promedioTempMaxAbs: this.calcularPromedio(this.datos.data.tempMaxAbs),
+                promedioTempMaxMedia: this.calcularPromedio(this.datos.data.tempMaxMedia),
+                promedioTempMedia: this.calcularPromedio(this.datos.data.tempMedia),
+                promedioTempMinMedia: this.calcularPromedio(this.datos.data.tempMinMedia),
+                promedioTempMinAbs: this.calcularPromedio(this.datos.data.tempMinAbs)
+
+            };
+        }
+
+
+        mostrarPromedios() {
+
+            this.resultadoPromedios.replaceChildren();
+
+            let promedios = this.getPromediosTemperaturas();
+
+            let titulo = document.createElement('h3');
+            titulo.textContent = "Promedios de Temperaturas";
+
+            this.resultadoPromedios.appendChild(titulo);
+
+
+            for (let dato in promedios) {
+
+                let p = document.createElement('p');
+
+                p.textContent = dato + ": " + promedios[dato] + " °C";
+
+                this.resultadoPromedios.appendChild(p);
+            }
+        }
+
+
+        connectedCallback() {
+
+            this.btnPromedios.onclick = this.mostrarPromedios.bind(this);
+        }
+
+
+        disconnectedCallback() {
+
+            this.btnPromedios.onclick = null;
+        }
+    }
+
+    customElements.define('x-tabla-meteorologica', TablaMeteorologica);
+
+
+
+    function main() {
+
+        let datos = new DatosMeteorologicos();
+        let tabla = new TablaMeteorologica(datos);
+
+        document.body.appendChild(tabla);
+    }
+
+
+    window.onload = main;
+
+</script>
+
+</html>
