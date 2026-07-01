@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora MVC</title>
+
+    <style>
+
+        input {
+            height: 40px;
+            font-size: 18px;
+            text-align: right;
+            padding-right: 10px;
+        }
+
+        button {
+            width: 100%;
+            height: 40px;
+            font-size: 18px;
+            color: white;
+            border: none;
+            box-shadow: inset 0 -5px 0 rgba(0,0,0,0.2);
+            border-radius: 5px;
+        }
+
+        .btn-number {
+            background-color: #498bba;
+        }
+
+        .btn-operator {
+            background-color: #3fe134;
+        }
+
+        .btn-equals {
+            background-color: #e79f48;
+        }
+
+        .btn-clear {
+            background-color: #dd4848;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    // ==========================
+    // MODEL
+    // ==========================
+
+    class CalculatorModel extends EventTarget {
+
+        constructor() {
+
+            super();
+
+            this.expression = "";
+        }
+
+
+        setData(data) {
+
+            this.expression += data;
+
+            this.changed();
+        }
+
+
+        getData() {
+
+            return this.expression;
+        }
+
+
+        calculate() {
+
+            this.expression = eval(this.expression).toString();
+
+            this.changed();
+        }
+
+
+        clear() {
+
+            this.expression = "";
+
+            this.changed();
+        }
+
+
+        changed() {
+
+            this.dispatchEvent(new CustomEvent("change"));
+        }
+
+    }
+
+
+
+    // ==========================
+    // CONTROLLER
+    // ==========================
+
+    class CalculatorController {
+
+        constructor(view, model) {
+
+            this.view = view;
+            this.model = model;
+
+            // Se guardan las funciones enlazadas para poder agregarlas y quitarlas luego
+            this.onButtonClickFunction = this.onViewButtonClick.bind(this);
+            this.onRequestFunction = this.onViewRequest.bind(this);
+            this.onModelChangeFunction = this.onModelChange.bind(this);
+        }
+
+
+        enable() {
+
+            this.view.addEventListener("buttonClick", this.onButtonClickFunction);
+            this.view.addEventListener("request", this.onRequestFunction);
+            this.model.addEventListener("change", this.onModelChangeFunction);
+        }
+
+
+        disable() {
+
+            this.view.removeEventListener("buttonClick", this.onButtonClickFunction);
+            this.view.removeEventListener("request", this.onRequestFunction);
+            this.model.removeEventListener("change", this.onModelChangeFunction);
+        }
+
+
+        onViewButtonClick(event) {
+
+            this.model.setData(event.detail);
+        }
+
+
+        onViewRequest(event) {
+
+            if (event.detail == "calculate") {
+
+                this.model.calculate();
+            }
+
+            if (event.detail == "delete") {
+
+                this.model.clear();
+            }
+        }
+
+
+        onModelChange() {
+
+            this.view.setData(this.model.getData());
+        }
+
+    }
+
+
+
+    // ==========================
+    // VIEW
+    // ==========================
+
+    class CalculatorView extends HTMLElement {
+
+        constructor() {
+
+            super();
+
+            // DISPLAY
+
+            this.display = document.createElement("input");
+            this.display.type = "text";
+            this.display.readOnly = true;
+
+            // BOTONES
+
+            this.btn0 = this.createBtn("0", "btn-number");
+            this.btn1 = this.createBtn("1", "btn-number");
+            this.btn2 = this.createBtn("2", "btn-number");
+            this.btn3 = this.createBtn("3", "btn-number");
+            this.btn4 = this.createBtn("4", "btn-number");
+            this.btn5 = this.createBtn("5", "btn-number");
+            this.btn6 = this.createBtn("6", "btn-number");
+            this.btn7 = this.createBtn("7", "btn-number");
+            this.btn8 = this.createBtn("8", "btn-number");
+            this.btn9 = this.createBtn("9", "btn-number");
+
+            this.btnDot = this.createBtn(".", "btn-number");
+
+            this.btnPlus = this.createBtn("+", "btn-operator");
+            this.btnMinus = this.createBtn("-", "btn-operator");
+            this.btnMult = this.createBtn("*", "btn-operator");
+            this.btnDiv = this.createBtn("/", "btn-operator");
+
+            this.btnEquals = this.createBtn("=", "btn-equals");
+            this.btnClear = this.createBtn("Borrar", "btn-clear");
+
+            // CONTENEDOR
+
+            this.container = document.createElement("div");
+
+            this.container.style.display = "grid";
+            this.container.style.gridTemplateColumns = "repeat(4,1fr)";
+            this.container.style.gap = "10px";
+            this.container.style.width = "220px";
+            this.container.style.margin = "20px auto";
+
+            this.display.style.gridColumn = "span 4";
+            this.btnClear.style.gridColumn = "span 4";
+
+            this.container.appendChild(this.display);
+
+            [
+                this.btn7, this.btn8, this.btn9, this.btnPlus,
+                this.btn4, this.btn5, this.btn6, this.btnMinus,
+                this.btn1, this.btn2, this.btn3, this.btnMult,
+                this.btn0, this.btnDot, this.btnEquals, this.btnDiv,
+                this.btnClear
+
+            ].forEach(btn => this.container.appendChild(btn));
+
+            this.appendChild(this.container);
+        }
+
+        createBtn(text, cssClass) {
+
+            let btn = document.createElement("button");
+
+            btn.textContent = text;
+            btn.value = text;
+            btn.className = cssClass;
+
+            return btn;
+        }
+
+        // El controlador actualiza la pantalla usando este método
+        setData(data) {
+
+            this.display.value = data;
+        }
+
+        // Devuelve el contenido del display
+        getData() {
+
+            return this.display.value;
+        }
+
+        // Se ejecuta al presionar cualquier número u operador
+        onButtonClick(event) {
+
+            this.dispatchEvent(
+
+                new CustomEvent("buttonClick", {
+
+                    detail: event.target.value
+                })
+            );
+        }
+
+        // Se ejecuta al presionar "="
+        onCalculate() {
+
+            this.dispatchEvent(
+
+                new CustomEvent("request", {
+
+                    detail: "calculate"
+                })
+            );
+        }
+
+        // Se ejecuta al presionar "Borrar"
+        onDelete() {
+
+            this.dispatchEvent(
+
+                new CustomEvent("request", {
+
+                    detail: "delete"
+                })
+            );
+        }
+
+        connectedCallback() {
+
+            // NÚMEROS
+
+            this.btn0.onclick = this.onButtonClick.bind(this);
+            this.btn1.onclick = this.onButtonClick.bind(this);
+            this.btn2.onclick = this.onButtonClick.bind(this);
+            this.btn3.onclick = this.onButtonClick.bind(this);
+            this.btn4.onclick = this.onButtonClick.bind(this);
+            this.btn5.onclick = this.onButtonClick.bind(this);
+            this.btn6.onclick = this.onButtonClick.bind(this);
+            this.btn7.onclick = this.onButtonClick.bind(this);
+            this.btn8.onclick = this.onButtonClick.bind(this);
+            this.btn9.onclick = this.onButtonClick.bind(this);
+
+            // OPERADORES
+
+            this.btnDot.onclick = this.onButtonClick.bind(this);
+            this.btnPlus.onclick = this.onButtonClick.bind(this);
+            this.btnMinus.onclick = this.onButtonClick.bind(this);
+            this.btnMult.onclick = this.onButtonClick.bind(this);
+            this.btnDiv.onclick = this.onButtonClick.bind(this);
+
+            // ESPECIALES
+
+            this.btnEquals.onclick = this.onCalculate.bind(this);
+            this.btnClear.onclick = this.onDelete.bind(this);
+        }
+
+        disconnectedCallback() {
+
+            this.btn0.onclick = null;
+            this.btn1.onclick = null;
+            this.btn2.onclick = null;
+            this.btn3.onclick = null;
+            this.btn4.onclick = null;
+            this.btn5.onclick = null;
+            this.btn6.onclick = null;
+            this.btn7.onclick = null;
+            this.btn8.onclick = null;
+            this.btn9.onclick = null;
+
+            this.btnDot.onclick = null;
+
+            this.btnPlus.onclick = null;
+            this.btnMinus.onclick = null;
+            this.btnMult.onclick = null;
+            this.btnDiv.onclick = null;
+
+            this.btnEquals.onclick = null;
+            this.btnClear.onclick = null;
+        }
+    }
+
+
+    customElements.define('x-calculator', CalculatorView);
+
+
+
+    function main() {
+
+        let model = new CalculatorModel();
+        let view = new CalculatorView();
+        let controller = new CalculatorController(view, model);
+
+        controller.enable();
+
+        document.body.appendChild(view);
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
