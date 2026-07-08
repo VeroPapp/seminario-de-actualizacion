@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+    <link rel="stylesheet" href="./assets/icons/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./assets/css/w3pro-4.13.css">
+    <link rel="stylesheet" href="./assets/css/w3-theme.css">
+    <link rel="stylesheet" href="./assets/css/admin-styles.css">
+    <link rel="stylesheet" href="./assets/css/scrollbar.css">
+</head>
+<body>
+    
+</body>
+
+<script>
+
+class WCApplicationView extends HTMLElement {
+
+    constructor() {
+
+        super();
+
+        // Aplicación
+        this.app = document.createElement("div");
+        this.app.id = "app";
+
+        // Componentes principales
+        this.header = this.createHeader();
+        this.sidebar = this.createSidebar();
+        this.main = this.createMain();
+        this.footer = this.createFooter();
+
+        // El footer pertenece al main
+        this.main.appendChild(this.footer);
+
+        // Armado de la aplicación
+        this.app.appendChild(this.header);
+        this.app.appendChild(this.sidebar);
+        this.app.appendChild(this.main);
+
+        this.appendChild(this.app);
+    }
+
+
+        createHeader() {
+
+            // Contenedor superior
+            this.header = document.createElement("div");
+            this.header.className = "w3-top w3-card";
+            this.header.style.height = "54px";
+
+            // Barra
+            this.bar = document.createElement("div");
+            this.bar.className = "w3-flex-bar w3-theme w3-left-align";
+
+            // Logo
+            this.logoContainer = document.createElement("div");
+            this.logoContainer.className = "admin-logo w3-bar-item w3-hide-medium w3-hide-small";
+            this.logoTitle = document.createElement("h5");
+            this.logoTitle.style.lineHeight = "1";
+            this.logoTitle.style.margin = "0";
+            this.logoTitle.style.fontWeight = "300";
+
+            this.logoLink = document.createElement("a");
+            this.logoLink.href = "./index.html";
+            this.logoLink.className = "w3-button w3-bold";
+
+            this.logoImage = document.createElement("img");
+            this.logoImage.src = "./assets/admin-logo.png";
+            this.logoImage.className = "w3-image";
+            this.logoImage.width = 26;
+
+            this.logoLink.appendChild(this.logoImage);
+            this.logoLink.append(" W3Admin");
+
+            this.logoTitle.appendChild(this.logoLink);
+
+            this.logoContainer.appendChild(this.logoTitle);
+
+            // Botón hamburguesa
+            this.menuButton = document.createElement("label");
+            this.menuButton.setAttribute("for", "sidebar-control");
+            this.menuButton.className = "w3-button w3-large w3-opacity-min";
+            this.menuIcon = document.createElement("i");
+            this.menuIcon.className = "fa fa-bars";
+            this.menuButton.appendChild(this.menuIcon);
+
+            // Botones de la derecha
+            this.rightButtons = document.createElement("div");
+            this.rightButtons.className = "w3-right";
+            this.rightButtons.appendChild(this.createTopButton("fa fa-envelope-open"));
+            this.rightButtons.appendChild(this.createTopButton("fa fa-bell"));
+
+            // Usuario
+            this.userButton = this.createUserButton();
+
+            // Armado
+            this.bar.appendChild(this.logoContainer);
+            this.bar.appendChild(this.menuButton);
+            this.bar.appendChild(this.rightButtons);
+            this.bar.appendChild(this.userButton);
+            this.header.appendChild(this.bar);
+
+            return this.header;
+        }
+
+        createSidebar() {
+
+            // Sidebar
+            this.sidebar = document.createElement("nav");
+            this.sidebar.id = "sidebar";
+            this.sidebar.className = "w3-sidebar w3-top w3-bottom w3-collapse w3-white w3-border-right w3-border-top scrollbar";
+            this.sidebar.style.zIndex = "3";
+            this.sidebar.style.width = "230px";
+            this.sidebar.style.height = "auto";
+            this.sidebar.style.marginTop = "54px";
+            this.sidebar.style.borderColor = "rgba(0,0,0,.1)";
+
+            // Contenedor de opciones
+            this.menu = document.createElement("div");
+            this.menu.className = "w3-bar-block";
+
+            // Título principal
+            this.titleMain = document.createElement("span");
+            this.titleMain.className = "w3-bar-item w3-padding w3-small w3-opacity";
+            this.titleMain.style.marginTop = "8px";
+            this.titleMain.textContent = "MAIN NAVIGATION";
+
+            // Botones del menú
+            this.dashboardButton = this.createMenuButton("./index.html", "fa fa-fw fa-bar-chart", "Dashboard");
+            this.iconsButton = this.createMenuButton("./icons.html", "fa fa-fw fa-fire", "UI Icons");
+            this.formsButton = this.createMenuButton("./forms.html", "fa fa-fw fa-edit", "Forms");
+            this.tablesButton = this.createMenuButton("./tables.html", "fa fa-fw fa-table", "Tables");
+            this.profileButton = this.createMenuButton("./profile.html", "fa fa-fw fa-user-circle", "Profile");
+            this.loginButton = this.createMenuButton("./login.html", "fa fa-fw fa-lock", "Login");
+            this.registerButton = this.createMenuButton("./register.html", "fa fa-fw fa-sign-in", "Registration");
+
+            // Labels
+            this.titleLabels = document.createElement("span");
+            this.titleLabels.className ="w3-bar-item w3-padding w3-small w3-opacity";
+            this.titleLabels.textContent = "LABELS";
+
+            // Botones inferiores
+            this.importantButton = this.createMenuButton("#dashboard", "fa fa-fw fa-coffee w3-text-danger", "Important");
+            this.warningButton = this.createMenuButton("#dashboard", "fa fa-fw fa-circle-o-notch w3-text-success", "Warning");
+            this.informationButton = this.createMenuButton("#dashboard", "fa fa-fw fa-share-alt w3-text-info", "Information");
+
+            // Armado
+            this.menu.appendChild(this.titleMain);
+
+            this.menu.appendChild(this.dashboardButton);
+            this.menu.appendChild(this.iconsButton);
+            this.menu.appendChild(this.formsButton);
+            this.menu.appendChild(this.tablesButton);
+            this.menu.appendChild(this.profileButton);
+            this.menu.appendChild(this.loginButton);
+            this.menu.appendChild(this.registerButton);
+
+            this.menu.appendChild(this.titleLabels);
+
+            this.menu.appendChild(this.importantButton);
+            this.menu.appendChild(this.warningButton);
+            this.menu.appendChild(this.informationButton);
+
+            this.sidebar.appendChild(this.menu);
+
+            return this.sidebar;
+        }
+
+        createMenuButton(href, iconClass, text) {
+
+            let button = document.createElement("a");
+
+            button.href = href;
+            button.className = "w3-bar-item w3-button w3-padding-large w3-hover-text-primary";
+
+            let icon = document.createElement("i");
+
+            icon.className = iconClass;
+
+            button.appendChild(icon);
+            button.append("  " + text);
+
+            return button;
+        }
+
+        createTopButton(iconClass) {
+
+            let button = document.createElement("button");
+
+            button.type = "button";
+            button.className = "w3-button w3-large w3-opacity-min";
+
+            let icon = document.createElement("i");
+            icon.className = iconClass;
+
+            button.appendChild(icon);
+
+            return button;
+        }
+
+        createUserButton() {
+
+            let container = document.createElement("div");
+            container.className = "text-right";
+
+            let button = document.createElement("div");
+            button.className = "w3-button";
+
+            let circle = document.createElement("div");
+            circle.className = "w3-circle w3-center w3-text-white w3-primary";
+            circle.style.width = "38px";
+            circle.style.height = "38px";
+
+            let icon = document.createElement("i");
+
+            icon.className = "fa fa-fw fa-user";
+            icon.style.marginTop = "11px";
+
+            circle.appendChild(icon);
+            button.appendChild(circle);
+            container.appendChild(button);
+
+            return container;
+        }
+
+        createMain() {
+
+            let main = document.createElement("div");
+            main.className = "w3-main";
+            main.style.marginTop = "54px";
+
+            this.content = document.createElement("div");
+            this.content.style.padding = "16px 32px";
+            this.content.style.minHeight = "80vh"; // espacio para el contenido
+
+            main.appendChild(this.content);
+
+            return main;
+        }
+
+        createFooter() {
+
+            this.footer = document.createElement("footer");
+            this.footer.className = "w3-padding w3-border-top w3-center w3-white w3-margin-top";
+
+            this.textFooter = document.createElement("span");
+            this.textFooter.className = "w3-opacity";
+            this.textFooter.innerHTML =  'Powered with <span class="w3-text-red">♥</span> by <strong>W3Mix.com</strong>.';
+
+            this.footer.appendChild(this.textFooter);
+
+            return this.footer;
+        }
+
+        onMenuClick() {
+
+            this.dispatchEvent(new CustomEvent("menuClick"));
+
+        }
+
+        connectedCallback() {
+
+            this.menuButton.onclick = this.onMenuClick.bind(this);
+
+        }
+
+        disconnectedCallback() {
+
+            this.menuButton.onclick = null;
+
+        }
+
+    }
+
+    customElements.define("x-application-view", WCApplicationView);
+
+    function main() {
+
+        let application = new WCApplicationView();
+
+        document.body.appendChild(application);
+
+    }
+
+window.onload = main;
+
+</script>
+</html>
