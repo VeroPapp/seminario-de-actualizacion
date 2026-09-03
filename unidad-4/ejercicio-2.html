@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ejercicio 2 - Triángulo</title>
+    <meta name="generator" content="Geany 2.0" />
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+                
+        }
+        
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+            
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+
+        }
+        
+        drawTriangle(ctx, width, height){
+            let centerX = width / 2;
+            let centerY = height / 2;
+
+            let baseHalf = 250;
+            let heightTriangle = 150;
+
+            let p1 = {
+                x: centerX,
+                y: centerY - heightTriangle
+            };
+
+            let p2 = {
+                x: centerX - baseHalf,
+                y: centerY + heightTriangle
+            };
+
+            let p3 = {
+                x: centerX + baseHalf,
+                y: centerY + heightTriangle
+            };
+
+            ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.lineTo(p3.x, p3.y);
+            ctx.closePath();
+
+            ctx.stroke();
+        };
+
+
+        connectedCallback() {
+
+
+        this.drawTriangle(this._ctx, this._canvas.width, this._canvas.height);       
+
+        }
+
+        disconnectedCallback() {
+            
+        }
+        
+        _onSave() {
+        
+        }
+    }
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest = this.onViewRequest.bind(this);
+        }
+        
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+        }
+        
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+        
+        onModelChanged() {
+            
+        }
+        
+        onViewRequest(event) {
+        
+        }
+    }
+
+
+    function main() {
+        let myModel = new Model();
+        let myView = new View();
+        let myController = new Controller(myView, myModel);
+        
+        myController.enable();
+        
+        document.body.appendChild(myView);
+    }
+    
+    window.onload = main;
+
+</script>
+
+</html>
