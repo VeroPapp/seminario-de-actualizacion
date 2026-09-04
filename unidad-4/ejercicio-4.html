@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ejercicio 4 - Circulos</title>
+    <meta name="generator" content="Geany 2.0" />
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+                
+        }
+        
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 500;
+            this._canvas.height = 500;
+            this._canvas.style.border = '1px solid black';
+            
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+
+        }
+        
+        drawCircles(ctx, width, height, separation) {
+            let centerX = width / 2;
+            let centerY = height / 2;
+            let r = width / 2;
+            let ai = 0;
+            let af = 2 * Math.PI;
+            let s = separation;
+
+            while (r > 0) {
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, r, ai, af);
+                ctx.stroke();
+                r -= s;
+            }
+        };
+
+
+        connectedCallback() {
+            
+            this.drawCircles(this._ctx, this._canvas.width, this._canvas.height, 25);       
+
+        }
+
+        disconnectedCallback() {
+            
+        }
+        
+        _onSave() {
+        
+        }
+    }
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest = this.onViewRequest.bind(this);
+        }
+        
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+        }
+        
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+        
+        onModelChanged() {
+            
+        }
+        
+        onViewRequest(event) {
+        
+        }
+    }
+
+
+    function main() {
+        let myModel = new Model();
+        let myView = new View();
+        let myController = new Controller(myView, myModel);
+        
+        myController.enable();
+        
+        document.body.appendChild(myView);
+    }
+    
+    window.onload = main;
+
+</script>
+
+</html>
