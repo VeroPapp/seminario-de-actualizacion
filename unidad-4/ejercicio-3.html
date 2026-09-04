@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ejercicio 3 - Polígono</title>
+    <meta name="generator" content="Geany 2.0" />
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+                
+        }
+        
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+            
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+
+            this._points = [
+                { x: 0, y: -150 },
+                { x: 130, y: -70 },
+                { x: 130, y: 70 },
+                { x: 0, y: 150 },
+                { x: -130, y: 70 },
+                { x: -130, y: -70 }
+            ];
+
+        }
+        
+        drawPolygon(ctx, width, height, points){
+            let centerX = width / 2;
+            let centerY = height / 2;
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                centerX + points[0].x,
+                centerY + points[0].y
+            );
+
+            for (let i = 1; i < points.length; i++) {
+                ctx.lineTo(
+                    centerX + points[i].x,
+                    centerY + points[i].y
+                );
+            }
+
+            ctx.closePath();
+            ctx.stroke();
+        };
+
+
+        connectedCallback() {
+            
+        this.drawPolygon(this._ctx, this._canvas.width, this._canvas.height, this._points);       
+
+        }
+
+        disconnectedCallback() {
+            
+        }
+        
+        _onSave() {
+        
+        }
+    }
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest = this.onViewRequest.bind(this);
+        }
+        
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+        }
+        
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+        
+        onModelChanged() {
+            
+        }
+        
+        onViewRequest(event) {
+        
+        }
+    }
+
+
+    function main() {
+        let myModel = new Model();
+        let myView = new View();
+        let myController = new Controller(myView, myModel);
+        
+        myController.enable();
+        
+        document.body.appendChild(myView);
+    }
+    
+    window.onload = main;
+
+</script>
+
+</html>
