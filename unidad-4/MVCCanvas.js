@@ -23,7 +23,7 @@ export class Model extends EventTarget {
         return this._figures;
     }
 }
-
+ 
 
 export class View extends HTMLElement {
 

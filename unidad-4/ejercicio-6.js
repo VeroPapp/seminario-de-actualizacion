@@ -43,7 +43,7 @@ function drawFigure(ctx, figure) {
     }
 }
 
-
+ 
 function main() {
 
     const model = new Model();
