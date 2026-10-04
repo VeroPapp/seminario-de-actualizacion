@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ejercicios unidad 4 - Canvas</title>
+    <title>Ejercicio unidad 4 - Canvas</title>
 </head>
 <body>
     
@@ -11,6 +11,22 @@
     <p>Json de circulo: <br> {"type": "circle", "x": 300, "y": 200, "radius": 80}</p>
     <p>Json de poligono: <br> {"type": "polygon", "x": 500, "y": 350, "points": [{ "x": 0, "y": -80 }, { "x": 70, "y": 50 }, { "x": -70, "y": 50 }]}</p>
 
-    <script type="module" src="ejercicio-6.js"></script>
+    <script src="MVCCanvas.js"></script>
+
+    <script>
+
+        function main() {
+
+            const model = new Model();
+            const view = new View();
+            const controller = new Controller(view, model);
+
+            controller.enable();
+
+            document.body.appendChild(view);
+        }
+
+        window.onload = main;
+    </script>
 </body>
 </html> 
