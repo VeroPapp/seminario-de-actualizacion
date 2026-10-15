@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Ejercicio 2 - Triángulo</title>
-    <meta name="generator" content="Geany 2.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 4 - Circulos</title>
 </head>
 
 <body>
@@ -16,7 +15,12 @@
     class Model extends EventTarget {
         constructor() {
             super();
+            this._separation = 25;
                 
+        }
+
+        get separation() {
+            return this._separation;
         }
         
         changed() {
@@ -29,8 +33,8 @@
         constructor() {
             super();
             this._canvas = document.createElement('canvas');
-            this._canvas.width = 800;
-            this._canvas.height = 600;
+            this._canvas.width = 500;
+            this._canvas.height = 500;
             this._canvas.style.border = '1px solid black';
             
             this._ctx = this._canvas.getContext('2d');
@@ -39,53 +43,32 @@
 
         }
         
-        drawTriangle(ctx, width, height){
-            let centerX = width / 2;
-            let centerY = height / 2;
+        drawCircles(separation) {
+            let centerX = this._canvas.width / 2;
+            let centerY = this._canvas.height / 2;
+            let r = this._canvas.width / 2;
+            let ai = 0;
+            let af = 2 * Math.PI;
 
-            let baseHalf = 250;
-            let heightTriangle = 150;
-
-            let p1 = {
-                x: centerX,
-                y: centerY - heightTriangle
-            };
-
-            let p2 = {
-                x: centerX - baseHalf,
-                y: centerY + heightTriangle
-            };
-
-            let p3 = {
-                x: centerX + baseHalf,
-                y: centerY + heightTriangle
-            };
-
-            ctx.beginPath();
-                ctx.moveTo(p1.x, p1.y);
-                ctx.lineTo(p2.x, p2.y);
-                ctx.lineTo(p3.x, p3.y);
-            ctx.closePath();
-
-            ctx.stroke();
+            while (r > 0) {
+                this._ctx.beginPath();
+                this._ctx.arc(centerX, centerY, r, ai, af);
+                this._ctx.stroke();
+                r -= separation;
+            }
         };
 
 
         connectedCallback() {
-
-
-        this.drawTriangle(this._ctx, this._canvas.width, this._canvas.height);       
-
+        
         }
 
         disconnectedCallback() {
             
         }
         
-        _onSave() {
-        
-        }
     }
+
     customElements.define('x-view', View);
 
 
@@ -93,6 +76,7 @@
         constructor(view, model) {
             this._view = view;
             this._model = model;
+
             this._onModelChanged = this.onModelChanged.bind(this);
             this._onViewRequest = this.onViewRequest.bind(this);
         }
@@ -100,6 +84,8 @@
         enable() {
             this._model.addEventListener('changed', this._onModelChanged);
             this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawCircles(this._model.separation);
         }
         
         disable() {
@@ -108,7 +94,7 @@
         }
         
         onModelChanged() {
-            
+            this._view.drawCircles(this._model.separation);
         }
         
         onViewRequest(event) {

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Ejercicio 1 - Cruz</title>
-    <meta name="generator" content="Geany 2.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 3 - Polígono</title>
 </head>
 
 <body>
@@ -16,9 +15,22 @@
     class Model extends EventTarget {
         constructor() {
             super();
+
+            this._points = [
+                { x: 0, y: -150 },
+                { x: 130, y: -70 },
+                { x: 130, y: 70 },
+                { x: 0, y: 150 },
+                { x: -130, y: 70 },
+                { x: -130, y: -70 }
+            ];
                 
         }
         
+        get points() {
+            return this._points;
+        }
+
         changed() {
             this.dispatchEvent(new CustomEvent('changed'));
         }
@@ -39,22 +51,30 @@
 
         }
         
-        drawCross(ctx, width, height){
-            ctx.beginPath();
+        drawPolygon(points){
+            let centerX = this._canvas.width / 2;
+            let centerY = this._canvas.height / 2;
 
-            ctx.moveTo(0, 0);
-            ctx.lineTo(width, height);
-            ctx.moveTo(0, height);
-            ctx.lineTo(width, 0);
+            this._ctx.beginPath();
 
-            ctx.stroke();    
+            this._ctx.moveTo(
+                centerX + points[0].x,
+                centerY + points[0].y
+            );
+
+            for (let i = 1; i < points.length; i++) {
+                this._ctx.lineTo(
+                    centerX + points[i].x,
+                    centerY + points[i].y
+                );
+            }
+
+            this._ctx.closePath();
+            this._ctx.stroke();
         };
 
 
         connectedCallback() {
-
-
-        this.drawCross(this._ctx, this._canvas.width, this._canvas.height);       
 
         }
 
@@ -62,10 +82,9 @@
             
         }
         
-        _onSave() {
-        
-        }
+  
     }
+
     customElements.define('x-view', View);
 
 
@@ -73,6 +92,7 @@
         constructor(view, model) {
             this._view = view;
             this._model = model;
+            
             this._onModelChanged = this.onModelChanged.bind(this);
             this._onViewRequest = this.onViewRequest.bind(this);
         }
@@ -80,6 +100,8 @@
         enable() {
             this._model.addEventListener('changed', this._onModelChanged);
             this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawPolygon(this._model.points);
         }
         
         disable() {
@@ -88,6 +110,7 @@
         }
         
         onModelChanged() {
+            this._view.drawPolygon(this._model.points);
             
         }
         

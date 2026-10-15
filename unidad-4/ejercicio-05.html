@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejercicio 5 - Tablero de dardos</title>
-    <meta name="generator" content="Geany 2.0" />
 </head>
 
 <body>
@@ -16,9 +15,19 @@
     class Model extends EventTarget {
         constructor() {
             super();
+            this._separation = 50;
+            this._scores = [1000, 750, 500, 100, 50];
                 
         }
-        
+
+        get separation() {
+            return this._separation;
+        }
+
+        get scores() {
+            return this._scores;
+        }
+
         changed() {
             this.dispatchEvent(new CustomEvent('changed'));
         }
@@ -39,25 +48,23 @@
 
         }
         
-        drawCircles(ctx, width, height, separation) {
-            let centerX = width / 2;
-            let centerY = height / 2;
-            let r = width / 2;
+        drawCircles(separation, scores) {
+            let centerX = this._canvas.width / 2;
+            let centerY = this._canvas.height / 2;
+            let r = this._canvas.width / 2;
             let ai = 0;
             let af = 2 * Math.PI;
-            let s = separation;
 
-            let scores = [1000, 750, 500, 100, 50];
             let i = 0;
 
             while (r > 0) {
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, r, ai, af);
-                ctx.stroke();
+                this._ctx.beginPath();
+                this._ctx.arc(centerX, centerY, r, ai, af);
+                this._ctx.stroke();
 
-                ctx.fillText(scores[i], centerX, centerY - r + 20);
+                this._ctx.fillText(scores[i], centerX, centerY - r + 20);
                 
-                r -= s;
+                r -= separation;
                 i++;
             }
         };
@@ -65,18 +72,15 @@
 
         connectedCallback() {
             
-            this.drawCircles(this._ctx, this._canvas.width, this._canvas.height, 50);       
-
         }
 
         disconnectedCallback() {
             
         }
         
-        _onSave() {
-        
-        }
+
     }
+    
     customElements.define('x-view', View);
 
 
@@ -91,6 +95,8 @@
         enable() {
             this._model.addEventListener('changed', this._onModelChanged);
             this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawCircles(this._model.separation, this._model.scores);
         }
         
         disable() {
@@ -99,6 +105,7 @@
         }
         
         onModelChanged() {
+            this._view.drawCircles(this._model.separation, this._model.scores);
             
         }
         

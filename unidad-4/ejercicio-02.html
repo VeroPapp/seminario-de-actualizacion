@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Ejercicio 4 - Circulos</title>
-    <meta name="generator" content="Geany 2.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 2 - Triángulo</title>
 </head>
 
 <body>
@@ -16,9 +15,18 @@
     class Model extends EventTarget {
         constructor() {
             super();
-                
+            this._base = 200;
+            this._height = 150;
         }
-        
+
+        get base() {
+            return this._base;
+        }
+
+        get height() {
+            return this._height;
+        }
+
         changed() {
             this.dispatchEvent(new CustomEvent('changed'));
         }
@@ -29,8 +37,8 @@
         constructor() {
             super();
             this._canvas = document.createElement('canvas');
-            this._canvas.width = 500;
-            this._canvas.height = 500;
+            this._canvas.width = 800;
+            this._canvas.height = 600;
             this._canvas.style.border = '1px solid black';
             
             this._ctx = this._canvas.getContext('2d');
@@ -39,26 +47,36 @@
 
         }
         
-        drawCircles(ctx, width, height, separation) {
-            let centerX = width / 2;
-            let centerY = height / 2;
-            let r = width / 2;
-            let ai = 0;
-            let af = 2 * Math.PI;
-            let s = separation;
+        drawTriangle(base, height){
+            let centerX = this._canvas.width / 2;
+            let centerY = this._canvas.height / 2;
 
-            while (r > 0) {
-                ctx.beginPath();
-                ctx.arc(centerX, centerY, r, ai, af);
-                ctx.stroke();
-                r -= s;
-            }
+            let p1 = {
+                x: centerX,
+                y: centerY - height / 2
+            };
+
+            let p2 = {
+                x: centerX - base / 2,
+                y: centerY + height / 2
+            };
+
+            let p3 = {
+                x: centerX + base / 2,
+                y: centerY + height / 2
+            };
+
+            this._ctx.beginPath();
+                this._ctx.moveTo(p1.x, p1.y);
+                this._ctx.lineTo(p2.x, p2.y);
+                this._ctx.lineTo(p3.x, p3.y);
+            this._ctx.closePath();
+
+            this._ctx.stroke();
         };
 
 
         connectedCallback() {
-            
-            this.drawCircles(this._ctx, this._canvas.width, this._canvas.height, 25);       
 
         }
 
@@ -66,9 +84,6 @@
             
         }
         
-        _onSave() {
-        
-        }
     }
     customElements.define('x-view', View);
 
@@ -77,6 +92,7 @@
         constructor(view, model) {
             this._view = view;
             this._model = model;
+
             this._onModelChanged = this.onModelChanged.bind(this);
             this._onViewRequest = this.onViewRequest.bind(this);
         }
@@ -84,6 +100,8 @@
         enable() {
             this._model.addEventListener('changed', this._onModelChanged);
             this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawTriangle(this._model.base, this._model.height);
         }
         
         disable() {
@@ -92,6 +110,7 @@
         }
         
         onModelChanged() {
+            this._view.drawTriangle(this._model.base, this._model.height);
             
         }
         

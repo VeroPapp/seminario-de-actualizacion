@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8" />
-    <title>Ejercicio 3 - Polígono</title>
-    <meta name="generator" content="Geany 2.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 1 - Cruz</title>
 </head>
 
 <body>
@@ -37,43 +36,22 @@
 
             this.appendChild(this._canvas);
 
-            this._points = [
-                { x: 0, y: -150 },
-                { x: 130, y: -70 },
-                { x: 130, y: 70 },
-                { x: 0, y: 150 },
-                { x: -130, y: 70 },
-                { x: -130, y: -70 }
-            ];
-
         }
         
-        drawPolygon(ctx, width, height, points){
-            let centerX = width / 2;
-            let centerY = height / 2;
-
+        drawCross(ctx, width, height){
             ctx.beginPath();
 
-            ctx.moveTo(
-                centerX + points[0].x,
-                centerY + points[0].y
-            );
+            ctx.moveTo(0, 0);
+            ctx.lineTo(width, height);
+            ctx.moveTo(0, height);
+            ctx.lineTo(width, 0);
 
-            for (let i = 1; i < points.length; i++) {
-                ctx.lineTo(
-                    centerX + points[i].x,
-                    centerY + points[i].y
-                );
-            }
-
-            ctx.closePath();
-            ctx.stroke();
+            ctx.stroke();    
         };
 
 
         connectedCallback() {
-            
-        this.drawPolygon(this._ctx, this._canvas.width, this._canvas.height, this._points);       
+            this.drawCross(this._ctx, this._canvas.width, this._canvas.height);       
 
         }
 
@@ -81,9 +59,6 @@
             
         }
         
-        _onSave() {
-        
-        }
     }
     customElements.define('x-view', View);
 
