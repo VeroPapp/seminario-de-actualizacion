@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio 7 - Gráfico de torta</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._data = [0.30, 0.50, 0.10, 0.10];
+            this._radius = 180;
+        }
+
+        get data() {
+            return this._data;
+        }
+
+        get radius() {
+            return this._radius;
+        }
+
+        set data(newData) {
+            this._data = newData;
+            this.changed();
+        }
+
+        set radius(newRadius) {
+            this._radius = newRadius;
+            this.changed();
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+        }
+
+        drawPieChart(data, radius) {
+            const centerX = this._canvas.width / 2;
+            const centerY = this._canvas.height / 2;
+
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            const colores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
+
+            let anguloInicio = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                    const porcion = data[i];
+                    const anguloFin = anguloInicio + porcion * Math.PI * 2;
+
+                    this._ctx.beginPath();
+                    this._ctx.moveTo(centerX, centerY);
+                    this._ctx.arc(centerX, centerY, radius, anguloInicio, anguloFin);
+                    this._ctx.closePath();
+
+                    this._ctx.fillStyle = colores[i % colores.length];
+                    this._ctx.fill();
+
+                    this._ctx.strokeStyle = 'white';
+                    this._ctx.lineWidth = 2;
+                    this._ctx.stroke();
+
+                    const anguloMedio = anguloInicio + (anguloFin - anguloInicio) / 2;
+                    const distancia = radius * 0.6;
+
+                    const labelX = centerX + Math.cos(anguloMedio) * distancia;
+                    const labelY = centerY + Math.sin(anguloMedio) * distancia;
+
+                    this._ctx.fillStyle = 'white';
+                    this._ctx.font = '16px sans-serif';
+                    this._ctx.textAlign = 'center';
+                    this._ctx.textBaseline = 'middle';
+                    this._ctx.fillText((porcion * 100) + '%', labelX, labelY);
+
+                    anguloInicio = anguloFin;
+            }
+        }
+
+        connectedCallback() {
+
+        }
+
+        disconnectedCallback() {
+
+        }
+
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawPieChart(this._model.data, this._model.radius);
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawPieChart(this._model.data, this._model.radius);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+
+    function main() {
+        let myModel = new Model();
+        let myView = new View();
+        let myController = new Controller(myView, myModel);
+
+        document.body.appendChild(myView);
+        myController.enable();
+
+    
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
