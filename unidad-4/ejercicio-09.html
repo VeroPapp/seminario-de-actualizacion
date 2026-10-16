@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 9 - Muestrario de líneas</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._grosorInicial = 1;
+            this._grosorFinal = 25;
+            this._espaciado = 16;
+        }
+        
+        get grosorInicial() {
+            return this._grosorInicial;
+        }
+
+        get grosorFinal() {
+            return this._grosorFinal;
+        }
+
+        get espaciado() {
+            return this._espaciado;
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+        }
+
+        drawLines(grosorInicial, grosorFinal, espaciado) {
+            let x = 0;
+
+            for (let grosor = grosorInicial; grosor <= grosorFinal; grosor++) {
+                this._ctx.lineWidth = grosor;
+
+                this._ctx.beginPath();
+                this._ctx.moveTo(x, 0);
+                this._ctx.lineTo(x, this._canvas.height);
+                this._ctx.stroke();
+
+                x += grosor + espaciado;
+            }
+        }
+
+
+        connectedCallback() {
+        }
+
+        disconnectedCallback() {
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawLines(this._model.grosorInicial, this._model.grosorFinal, this._model.espaciado);
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawLines(this._model.grosorInicial, this._model.grosorFinal, this._model.espaciado);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
