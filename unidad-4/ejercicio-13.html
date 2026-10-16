@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 13 - Tablero ajedrez</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Slider extends HTMLElement {
+        constructor() {
+            super();
+
+            this.container = document.createElement('div');
+            this.container.className = 'band';
+
+            this.label = document.createElement('span');
+
+            this.slider = document.createElement('input');
+            this.slider.type = 'range';
+            this.slider.min = 0;
+            this.slider.max = 255;
+            this.slider.value = 0;
+
+            this.valueText = document.createElement('span');
+
+            this.container.appendChild(this.label);
+            this.container.appendChild(this.slider);
+            this.container.appendChild(this.valueText);
+        }
+
+        onSliderInput() {
+            this.valueText.textContent = this.slider.value;
+
+            this.dispatchEvent(new CustomEvent('value-changed', {
+                detail: this.getData(),
+                bubbles: true
+            }));
+        }
+
+        setData(label, value) {
+            this.label.textContent = label;
+            this.slider.value = value;
+            this.valueText.textContent = value;
+        }
+
+        getData() {
+            return {
+                channel: this.label.textContent,
+                value: Number(this.slider.value)
+            };
+        }
+
+        connectedCallback() {
+            if (!this.container.parentElement) {
+                this.appendChild(this.container);
+            }
+
+            this.slider.oninput = this.onSliderInput.bind(this);
+        }
+
+        disconnectedCallback() {
+            this.slider.oninput = null;
+        }
+    }
+
+    customElements.define('x-slider', Slider);
+
+
+
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._rows = 8;
+            this._columns = 8;
+            this._cellSize = 32;
+            this._color = { r: 0, g: 0, b: 0 };
+        }
+
+        get rows() { 
+            return this._rows; 
+        }
+
+        get columns() { 
+            return this._columns; 
+        }
+
+        get cellSize() { 
+            return this._cellSize; 
+        }
+
+        get color() { 
+            return this._color; 
+        }
+
+        set color(newColor) {
+            if (this._color.r !== newColor.r ||
+                this._color.g !== newColor.g ||
+                this._color.b !== newColor.b) {
+                this._color = newColor;
+                this.changed();
+            }
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+
+            this._canvas = document.createElement('canvas');
+            this._ctx = this._canvas.getContext('2d');
+            this._canvas.style.border = '1px solid black';
+
+            this._sliderR = document.createElement('x-slider');
+            this._sliderG = document.createElement('x-slider');
+            this._sliderB = document.createElement('x-slider');
+
+            this._sliderR.setData('R', 0);
+            this._sliderG.setData('G', 0);
+            this._sliderB.setData('B', 0);
+
+            this.appendChild(this._canvas);
+            this.appendChild(this._sliderR);
+            this.appendChild(this._sliderG);
+            this.appendChild(this._sliderB);
+        }
+
+        connectedCallback() {
+            this._onSliderChanged = this.handleSliderChanged.bind(this);
+            this.addEventListener('value-changed', this._onSliderChanged);
+        }
+
+        disconnectedCallback() {
+            this.removeEventListener('value-changed', this._onSliderChanged);
+        }
+
+        handleSliderChanged() {
+            this.dispatchEvent(new CustomEvent('request', {
+                detail: {
+                    action: 'colorChanged',
+                    r: this._sliderR.getData().value,
+                    g: this._sliderG.getData().value,
+                    b: this._sliderB.getData().value
+                }
+            }));
+        }
+
+        update(rows, columns, cellSize, color) {
+            this._canvas.width  = columns * cellSize;
+            this._canvas.height = rows * cellSize;
+
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            const blackColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < columns; c++) {
+                    const isBlack = (r + c) % 2 === 0;
+                    this._ctx.fillStyle = isBlack ? blackColor : 'white';
+                    this._ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this.onModelChanged();
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.update(
+                this._model.rows,
+                this._model.columns,
+                this._model.cellSize,
+                this._model.color
+            );
+        }
+
+        onViewRequest(event) {
+            if (event.detail.action === 'colorChanged') {
+                this._model.color = {
+                    r: event.detail.r,
+                    g: event.detail.g,
+                    b: event.detail.b
+                };
+            }
+        }
+    }
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
