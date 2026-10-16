@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 14 - Coloreado gradiente</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._color1 = '#ff66fa';
+            this._color2 = '#00ccff';
+        }
+
+        get color1() { 
+            return this._color1; 
+        }
+
+        get color2() { 
+            return this._color2; 
+        }
+
+        set color1(newColor) {
+            if (this._color1 !== newColor) {
+                this._color1 = newColor;
+                this.changed();
+            }
+        }
+
+        set color2(newColor) {
+            if (this._color2 !== newColor) {
+                this._color2 = newColor;
+                this.changed();
+            }
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+
+            this._canvas = document.createElement('canvas');
+            this._canvas.width  = 200;
+            this._canvas.height = 400;
+            this._canvas.style.border = '1px solid black';
+            this._ctx = this._canvas.getContext('2d');
+
+            this._container = document.createElement('div')
+
+            this._inputColor1 = document.createElement('input');
+            this._inputColor1.type = 'color';
+
+            this._inputColor2 = document.createElement('input');
+            this._inputColor2.type = 'color';
+
+            this._container.appendChild(this._inputColor1);
+            this._container.appendChild(this._inputColor2);
+
+            this.appendChild(this._container);
+            this.appendChild(this._canvas);
+        }
+
+        connectedCallback() {
+            this._onColorInput = this._handleColorInput.bind(this);
+            this._inputColor1.addEventListener('input', this._onColorInput);
+            this._inputColor2.addEventListener('input', this._onColorInput);
+        }
+
+        disconnectedCallback() {
+            this._inputColor1.removeEventListener('input', this._onColorInput);
+            this._inputColor2.removeEventListener('input', this._onColorInput);
+        }
+
+        _handleColorInput() {
+            this.dispatchEvent(new CustomEvent('request', {
+                detail: {
+                    action: 'colorChanged',
+                    color1: this._inputColor1.value,
+                    color2: this._inputColor2.value
+                }
+            }));
+        }
+
+        update(color1, color2) {
+            this._inputColor1.value = color1;
+            this._inputColor2.value = color2;
+
+            const centerX = this._canvas.width / 2;
+            const centerY = this._canvas.height / 2;
+
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            const left  = centerX - this._canvas.width / 2;
+            const right = centerX + this._canvas.width / 2;
+            const top   = centerY - this._canvas.height / 2;
+
+            const gradient = this._ctx.createLinearGradient(left, 0, right, 0);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+
+            this._ctx.fillStyle = gradient;
+            this._ctx.fillRect(left, top, this._canvas.width, this._canvas.height);
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this.onModelChanged();
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.update(this._model.color1, this._model.color2);
+        }
+
+        onViewRequest(event) {
+            if (event.detail.action === 'colorChanged') {
+                this._model.color1 = event.detail.color1;
+                this._model.color2 = event.detail.color2;
+            }
+        }
+    }
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
