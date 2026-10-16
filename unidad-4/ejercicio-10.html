@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 10 - Estilos de linea</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+
+            this._lineas = [
+                {
+                    puntos: [
+                        { x: 100, y: 100 },
+                        { x: 150, y: 250 },
+                        { x: 200, y: 100 }
+                    ],
+                    lineCap: 'butt',
+                    lineJoin: 'bevel'
+                },
+                {
+                    puntos: [
+                        { x: 350, y: 100 },
+                        { x: 400, y: 250 },
+                        { x: 450, y: 100 }
+                    ],
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                },
+                {
+                    puntos: [
+                        { x: 600, y: 100 },
+                        { x: 650, y: 250 },
+                        { x: 700, y: 100 }
+                    ],
+                    lineCap: 'square',
+                    lineJoin: 'miter'
+                }
+            ];
+        }
+
+        get lineas() {
+            return this._lineas;
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 400;
+            this._canvas.style.border = '1px solid black';
+            this._ctx = this._canvas.getContext('2d');
+            this.appendChild(this._canvas);
+        }
+
+        drawLines(lineas) {
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            this._ctx.lineWidth = 10;
+            this._ctx.strokeStyle = 'black';
+
+            for (let i = 0; i < lineas.length; i++) {
+                const linea = lineas[i];
+
+                this._ctx.lineCap  = linea.lineCap;
+                this._ctx.lineJoin = linea.lineJoin;
+
+                this._ctx.beginPath();
+                this._ctx.moveTo(linea.puntos[0].x, linea.puntos[0].y);
+
+                for (let j = 1; j < linea.puntos.length; j++) {
+                    this._ctx.lineTo(linea.puntos[j].x, linea.puntos[j].y);
+                }
+
+                this._ctx.stroke();
+            }
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawLines(this._model.lineas)
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawLines(this._model.lineas);
+
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
