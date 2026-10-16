@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 8 - Gráfico de torta con etiquetas</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._data = [];
+            this._radius = 180;
+        }
+
+        get data() { 
+            return this._data; 
+        }
+
+        get radius() {
+            return this._radius;
+        }
+
+        set data(value) {
+            this._data = value;
+            this.changed();
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+
+            this._ctx = this._canvas.getContext('2d');
+
+            this.appendChild(this._canvas);
+        }
+
+        drawPieChart(data, radius) {
+            const centerX = this._canvas.width / 2;
+            const centerY = this._canvas.height / 2;
+
+            const colores = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#1abc9c'];
+
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            let total = 0;
+            for (let i = 0; i < data.length; i++) {
+                total += data[i].value;
+            }
+
+            let anguloInicio = 0;
+
+            for (let i = 0; i < data.length; i++) {
+                const porcion   = data[i];
+                const anguloFin = anguloInicio + porcion.value * Math.PI * 2;
+
+                this._ctx.beginPath();
+                this._ctx.moveTo(centerX, centerY);
+                this._ctx.arc(centerX, centerY, radius, anguloInicio, anguloFin);
+                this._ctx.closePath();
+
+                this._ctx.fillStyle = colores[i % colores.length];
+                this._ctx.fill();
+
+                this._ctx.strokeStyle = 'white';
+                this._ctx.lineWidth = 2;
+                this._ctx.stroke();
+
+                const anguloMedio = anguloInicio + (anguloFin - anguloInicio) / 2;
+                const textR = radius * 0.65;
+                const textX = centerX + Math.cos(anguloMedio) * textR;
+                const textY = centerY + Math.sin(anguloMedio) * textR;
+
+                const pct = ((porcion.value / total) * 100).toFixed(0) + '%';
+
+                this._ctx.fillStyle    = 'white';
+                this._ctx.textAlign    = 'center';
+                this._ctx.textBaseline = 'middle';
+
+                this._ctx.font = 'bold 16px Arial';
+                this._ctx.fillText(porcion.label, textX, textY - 10);
+
+                this._ctx.font = '14px Arial';
+                this._ctx.fillText(pct, textX, textY + 10);
+
+                anguloInicio = anguloFin;
+            }
+        }
+
+        connectedCallback() {
+        }
+
+        disconnectedCallback() {
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawPieChart(this._model.data, this._model.radius);
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawPieChart(this._model.data, this._model.radius);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+        myModel.data = [
+            { label: 'Costos',    value: 0.30 },
+            { label: 'Ventas',    value: 0.50 },
+            { label: 'Impuestos', value: 0.10 },
+            { label: 'Otros',     value: 0.10 }
+        ];
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
