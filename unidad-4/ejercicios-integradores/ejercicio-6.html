@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio unidad 4 - Canvas</title>
+    <style>
+        a {text-decoration: none; color: black;}
+    </style>
+</head>
+
+<body>
+    
+    <h1>Ejercicio integrador 6</h1>
+
+    <button> <a href="index.html">Volver al inicio</a></button>
+    
+    <p>6. Integración: Modificar el WebComponent de modo que el modelo le permita agregar dinámicamente (círculos y 
+    polígonos) ubicables en cualquier punto (x,y) del área de dibujo, como así también, limpiar toda el área de dibujo. <br>
+
+    El componente tendrá que tener un botón de carga de figuras, que al realizar click, lance un prompt esperando el 
+    objeto JSON para representarlo inmediatamente en el canvas. También deberá tener un botón de limpieza.</p>
+
+    <p>Json de circulo: <br> {"type": "circle", "x": 300, "y": 200, "radius": 80}</p>
+    <p>Json de poligono: <br> {"type": "polygon", "x": 500, "y": 350, "points": [{ "x": 0, "y": -80 }, { "x": 70, "y": 50 }, { "x": -70, "y": 50 }]}</p>
+
+    <script src="MVCCanvas.js"></script>
+
+    <script>
+        function main() {
+            const model = new Model();
+            const view = new View();
+            const controller = new Controller(view, model);
+
+            controller.enable();
+            
+            view.setExercise(6);
+            
+            document.body.appendChild(view);
+        }
+        window.onload = main;
+    </script>
+</body>
+</html>

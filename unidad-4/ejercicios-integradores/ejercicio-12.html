@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios unidad 4 - Canvas</title>
+    <style>
+        a {text-decoration: none; color: black;}
+    </style>
+</head>
+<body>
+    
+    <h1>Ejercicio integrador 12</h1>
+
+    <button> <a href="index.html">Volver al inicio</a></button>
+
+    <p>12. Integración: Modificar el modelo del WebComponent integrado (Ej:6), de modo que las figuras gestionadas 
+    admitan propiedades de tipo de línea y grosor. <br> Para esto, el componente deberá tener dos inputs para seleccionar 
+    el tipo de línea y el valor de grosor. <br> Al hacer click en el botón de carga de figuras, se seguirá aceptando el mismo 
+    JSON sin cambios, solo anexará el valor de los inputs a la estructura de datos. </p>
+
+    <p>Json de circulo: <br> {"type": "circle", "x": 300, "y": 200, "radius": 80}</p>
+    <p>Json de poligono: <br> {"type": "polygon", "x": 500, "y": 350, "points": [{ "x": 0, "y": -80 }, { "x": 70, "y": 50 }, { "x": -70, "y": 50 }]}</p>
+
+    <script src="MVCCanvas.js"></script>
+
+    <script>
+
+        function main() {
+
+            const model = new Model();
+            const view = new View();
+            const controller = new Controller(view, model);
+
+            view.setExercise(12);
+
+            controller.enable();
+
+            document.body.appendChild(view);
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html> 

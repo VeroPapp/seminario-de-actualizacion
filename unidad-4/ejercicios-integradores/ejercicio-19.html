@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicios unidad 4 - Canvas</title>
+    <style>
+        a {text-decoration: none; color: black;}
+    </style>
+</head>
+<body>
+    
+    <h1>Ejercicio integrador 19</h1>
+
+    <button> <a href="index.html">Volver al inicio</a></button>
+
+    <p>19. Integración: Tomando la integración del punto 12, agregar un botón selector (select) desplegable que permita 
+    <br> seleccionar la figura que desee cargar (Círculo, Polígono) e incorpore un nuevo objeto llamado “CakeGraph” 
+    (Gráfico de torta circular) de modo que procese un JSON que contenga en su interior <br> la descripción de datos que 
+    corresponda para representar un gráfico de tortas. Cada región (tajada) se rellena con un color aleatorio de forma 
+    automática. Es decir, no debe suministrar colores. 
+    </p>
+
+    <p>Json de circulo: <br> {"x": 300, "y": 200, "radius": 80}</p>
+    <p>Json de poligono: <br> {"x": 500, "y": 350, "points": [{ "x": 0, "y": -80 }, { "x": 70, "y": 50 }, { "x": -70, "y": 50 }]}</p>
+    <p>Json de torta: <br> { "x": 400, "y": 300, "radius": 100, "data": [ {"value": 0.3}, {"value": 0.5}, {"value": 0.1}, {"value": 0.1} ] }</p>
+
+
+    <script src="MVCCanvas.js"></script>
+
+    <script>
+
+        function main() {
+
+            const model = new Model();
+            const view = new View();
+            const controller = new Controller(view, model);
+
+            view.setExercise(19);
+
+            controller.enable();
+
+            document.body.appendChild(view);
+        }
+
+        window.onload = main;
+    </script>
+</body>
+</html> 
