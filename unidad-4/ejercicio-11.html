@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 11 - Lineas punteadas</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._separacion = 15;
+            this._patronContinuo = [];
+            this._patronPunteado = [5, 5];
+        }
+
+        get separacion()     { 
+            return this._separacion; 
+        }
+
+        get patronContinuo() {
+            return this._patronContinuo;
+        }
+
+        get patronPunteado() {
+            return this._patronPunteado;
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+            this._ctx = this._canvas.getContext('2d');
+            this.appendChild(this._canvas);
+        }
+
+        drawLines(separacion, patronContinuo, patronPunteado) {
+            const ancho = this._canvas.width;
+            const alto  = this._canvas.height;
+
+            this._ctx.clearRect(0, 0, ancho, alto);
+            this._ctx.lineWidth = 1;
+            this._ctx.strokeStyle = 'black';
+
+            let i = 0;
+            for (let x = -alto; x < ancho; x += separacion) {
+                if (i % 2 === 0) {
+                    this._ctx.setLineDash(patronContinuo);
+                } else {
+                    this._ctx.setLineDash(patronPunteado);
+                }
+
+                this._ctx.beginPath();
+                this._ctx.moveTo(x, 0);
+                this._ctx.lineTo(x + alto, alto);
+                this._ctx.stroke();
+
+                i++;
+            }
+
+            this._ctx.setLineDash([]);
+        }
+
+        connectedCallback() {
+        }
+
+        disconnectedCallback() {
+        }
+    }
+
+    customElements.define('x-view', View);
+    
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this._view.drawLines(this._model.separacion, this._model.patronContinuo, this._model.patronPunteado);
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawLines(this._model.separacion, this._model.patronContinuo, this._model.patronPunteado);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
