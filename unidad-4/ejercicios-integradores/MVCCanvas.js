@@ -30,8 +30,6 @@ class View extends HTMLElement {
     constructor() {
         super();
 
-        this.exerciseNumber = 6;
-
         this._canvas = document.createElement('canvas');
         this._canvas.width = 800;
         this._canvas.height = 600;
@@ -118,36 +116,31 @@ class View extends HTMLElement {
 
         this._controls.appendChild(this._btnLoad);
         this._controls.appendChild(this._btnClear);
+
+        this._lineControls = [
+            this._labelLineStyle,
+            this._selectLineStyle,
+            this._labelLineWidth,
+            this._inputLineWidth
+        ];
+
+        this._figureControls = [
+            this._labelFigureType,
+            this._selectFigureType
+        ];
     }
 
     setExercise(exerciseNumber) {
         this.exerciseNumber = exerciseNumber;
 
-        const showLine   = exerciseNumber >= 12;
-        const showFigure = exerciseNumber >= 19;
-
-        // controles de línea
-        this._labelLineStyle.style.display  = showLine ? '' : 'none';
-        this._selectLineStyle.style.display = showLine ? '' : 'none';
-        this._labelLineWidth.style.display  = showLine ? '' : 'none';
-        this._inputLineWidth.style.display  = showLine ? '' : 'none';
-
-        // controles de tipo de figura
-        this._labelFigureType.style.display  = showFigure ? '' : 'none';
-        this._selectFigureType.style.display = showFigure ? '' : 'none';
+        this._toggleControls(this._lineControls,   exerciseNumber >= 12);
+        this._toggleControls(this._figureControls, exerciseNumber >= 19);
     }
 
-    connectedCallback() {
-        this._onLoadClick  = this._onLoadClick.bind(this);
-        this._onClearClick = this._onClearClick.bind(this);
-
-        this._btnLoad.onclick  = this._onLoadClick;
-        this._btnClear.onclick = this._onClearClick;
-    }
-
-    disconnectedCallback() {
-        this._btnLoad.onclick  = null;
-        this._btnClear.onclick = null;
+    _toggleControls(controls, visible) {
+        for (let i = 0; i < controls.length; i++) {
+            controls[i].hidden = !visible;
+        }
     }
 
     _onLoadClick() {
@@ -157,6 +150,7 @@ class View extends HTMLElement {
         }
 
         let figure;
+
         try {
             figure = JSON.parse(raw);
         } catch (err) {
@@ -282,6 +276,16 @@ class View extends HTMLElement {
         const hue = Math.floor(Math.random() * 360);
         return `hsl(${hue}, 70%, 60%)`;
     }
+
+    connectedCallback() {
+        this._btnLoad.onclick  = this._onLoadClick.bind(this);
+        this._btnClear.onclick = this._onClearClick.bind(this);
+    }
+
+    disconnectedCallback() {
+        this._btnLoad.onclick  = null;
+        this._btnClear.onclick = null;
+    }
 }
 
 customElements.define('x-view', View);
@@ -333,18 +337,3 @@ class Controller {
         }
     }
 }
-
-
-function main() {
-    const myModel = new Model();
-    const myView = new View();
-    const myController = new Controller(myView, myModel);
-
-    myController.enable();
-
-    myView.setExercise(19);
-
-    document.body.appendChild(myView);
-}
-
-window.onload = main;
