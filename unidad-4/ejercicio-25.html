@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 25 - Imagen con filtro</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._imageUrl = 'https://i.pinimg.com/236x/0b/f5/d9/0bf5d9180a99f773b6e4a23ac1c5bf61.jpg?nii=t';
+            this._x = 0;
+            this._y = 0;
+            this._filter = 'brightness(120%) contrast(150%) blur(2px)';
+        }
+
+        get imageUrl() { 
+            return this._imageUrl; 
+        }
+
+        get x() { 
+            return this._x; 
+        }
+
+        get y() { 
+            return this._y; 
+        }
+
+        get filter(){
+            return this._filter;
+        }
+
+        set imageUrl(url) {
+            if (this._imageUrl !== url) {
+                this._imageUrl = url;
+                this.changed();
+            }
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+            this._ctx = this._canvas.getContext('2d');
+            this.appendChild(this._canvas);
+        }
+
+        drawFilteredImage(url, x, y, filter) {
+            const img = new Image();
+
+            img.onload  = this._onImageLoad.bind(this, img, x, y, filter);
+            img.onerror = this._onImageError.bind(this, url);
+
+            img.src = url;
+        }
+
+        _onImageLoad(img, x, y, filter) {
+            const width  = this._canvas.width;
+            const height = this._canvas.height;
+
+            this._ctx.clearRect(0, 0, width, height);
+
+            this._ctx.save();
+
+            this._ctx.filter = filter;
+            this._ctx.drawImage(img, x, y);
+
+            this._ctx.restore();
+
+            this._drawDemoShape();
+
+        }
+
+        _drawDemoShape() {
+            this._ctx.beginPath();
+            this._ctx.arc(600, 400, 80, 0, Math.PI * 2);
+            this._ctx.fillStyle = '#e74c3c';
+            this._ctx.fill();
+        }
+
+        _onImageError(url) {
+            console.error('No se pudo cargar la imagen: ' + url);
+        }
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this.onModelChanged();
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.drawFilteredImage(this._model.imageUrl, this._model.x, this._model.y, this._model.filter);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
