@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ejercicio 27 - Rectángulo con rotación</title>
+</head>
+
+<body>
+
+</body>
+
+<script>
+
+    class Model extends EventTarget {
+        constructor() {
+            super();
+            this._x = 400;
+            this._y = 300;
+            this._width = 200;
+            this._height = 100;
+            this._angle = Math.PI / 4;
+        }
+
+        get x() { 
+            return this._x; 
+        }
+
+        get y() { 
+            return this._y; 
+        }
+
+        get width(){
+            return this._width;
+        }
+
+        get height(){
+            return this._height;
+        }
+
+        get angle(){
+            return this._angle;
+        }
+
+        changed() {
+            this.dispatchEvent(new CustomEvent('changed'));
+        }
+    }
+
+    class View extends HTMLElement {
+        constructor() {
+            super();
+            this._canvas = document.createElement('canvas');
+            this._canvas.width = 800;
+            this._canvas.height = 600;
+            this._canvas.style.border = '1px solid black';
+            this._ctx = this._canvas.getContext('2d');
+            this.appendChild(this._canvas);
+        }
+
+        render(x, y, width, height, angle) {
+            this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+            const centerX = this._canvas.width / 2;
+            const centerY = this._canvas.height / 2;
+
+            this._ctx.save();
+            this._ctx.translate(centerX, centerY);
+            this._ctx.rotate(angle);
+            this._ctx.strokeRect(-width / 2, -height / 2, width, height);
+            this._ctx.restore();
+        }
+
+    }
+
+    customElements.define('x-view', View);
+
+
+    class Controller {
+        constructor(view, model) {
+            this._view = view;
+            this._model = model;
+            this._onModelChanged = this.onModelChanged.bind(this);
+            this._onViewRequest  = this.onViewRequest.bind(this);
+        }
+
+        enable() {
+            this._model.addEventListener('changed', this._onModelChanged);
+            this._view.addEventListener('request', this._onViewRequest);
+
+            this.onModelChanged();
+        }
+
+        disable() {
+            this._model.removeEventListener('changed', this._onModelChanged);
+            this._view.removeEventListener('request', this._onViewRequest);
+        }
+
+        onModelChanged() {
+            this._view.render(this._model.x, this._model.y, this._model.width, this._model.height, this._model.angle);
+        }
+
+        onViewRequest(event) {
+        }
+    }
+
+    function main() {
+        const myModel = new Model();
+        const myView = new View();
+        const myController = new Controller(myView, myModel);
+
+        myController.enable();
+
+        document.body.appendChild(myView);
+
+    }
+
+    window.onload = main;
+
+</script>
+
+</html>
